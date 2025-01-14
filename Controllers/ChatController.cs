@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Musicalia.Services.Interfaces;
-using Swan.Parsers;
 
 namespace Musicalia.Controllers
 {
@@ -17,17 +15,20 @@ namespace Musicalia.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePlaylist()
+        public async Task<IActionResult> GetSpotifyPlaylist(string query)
         {
             try
             {
-                string token = await _spotifyService.GetAccessToken();
+                string playlistLink = await _spotifyService.GetPlaylistLink(query);
 
-                return Ok(token);
+                if (playlistLink != string.Empty )
+                    return Ok(playlistLink);
+
+                return NotFound("Não foi possível retornar o link da playlist.");
             }
             catch (Exception ex)
             {
-                return BadRequest("Não foi possível criar a playlist. Erro: " +ex.Message);
+                return BadRequest("Não foi possível retornar uma playlist. Erro: " + ex.Message);
             }
         }
 

@@ -1,54 +1,84 @@
 ﻿using Musicalia.Services.Interfaces;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+using SpotifyAPI.Web;
 
 namespace Musicalia.Services.Classes
 {
     public class SpotifyService : ISpotifyService
     {
-        private readonly string _clientId;
-        private readonly string _clientSecret;
+        private readonly ITokenService _tokenManager;
 
-        public SpotifyService(IConfiguration configuration)
+        public SpotifyService(ITokenService tokenManager)
         {
-            _clientId = configuration["SpotifySecrets:CLIENT_ID"]!;
-            _clientSecret = configuration["SpotifySecrets:CLIENT_SECRET"]!;
-        }
+            _tokenManager = tokenManager;
+        }       
 
-
-        public async Task<string> GetAccessToken()
+        public async Task<string> GetPlaylistLink(string query)
         {
-            string url = "https://accounts.spotify.com/api/token";
-            string clientCredentials = "grant_type=client_credentials";
-
-
-            var encode_clientid_clientsecret = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", _clientId, _clientSecret)));            
-
-            HttpClient client = new HttpClient();
+            string externalUrl = string.Empty;
+            string token = await _tokenManager.GetTokenAsync();
+            var spotify = new SpotifyClient(token);
+            int offSet = 0;
+            bool playlistLinkIsValid = false;
 
             try
+            {              
+                SearchRequest request = new SearchRequest(SearchRequest.Types.Playlist, query)
+                {
+                    Limit = 1,
+                    Offset = offSet
+                };
+
+                var searchResult = await spotify.Search.Item(request);
+
+                var playlistLinks = searchResult.Playlists.Items
+                    ?.Select(playlist => playlist.ExternalUrls!["spotify"])
+                    .ToList();
+
+                if (playlistLinks != null && playlistLinks.Any())
+                {
+                    foreach (var link in playlistLinks)
+                    {
+                        externalUrl = link;
+                        break;
+                    }
+                }
+
+                return externalUrl;
+            }
+            catch (NullReferenceException)
             {
-                var content = new StringContent(clientCredentials, Encoding.ASCII, "application/x-www-form-urlencoded");
+                while (!playlistLinkIsValid)
+                {
+                    offSet++;
 
-                client.DefaultRequestHeaders.Add("Authorization", "Basic " + encode_clientid_clientsecret);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    SearchRequest request = new SearchRequest(SearchRequest.Types.Playlist, query)
+                    {
+                        Limit = 1,
+                        Offset = offSet
+                    };
 
-                HttpResponseMessage response = await client.PostAsync(url, content);
-                response.EnsureSuccessStatusCode();
+                    var searchResult = await spotify.Search.Item(request);
 
-                string responseBody = await response.Content.ReadAsStringAsync();
+                    if (searchResult.Playlists.Items?[0] == null)
+                        continue;                     
 
-                JsonDocument doc = JsonDocument.Parse(responseBody);
-                string accessToken = doc.RootElement.GetProperty("access_token").GetString()!;
+                    var playlistLinks = searchResult.Playlists.Items
+                        .Select(playlist => playlist.ExternalUrls!["spotify"])
+                        .ToList();
 
-                return accessToken;
+                    if (playlistLinks != null && playlistLinks.Any())
+                    {
+                        foreach (var link in playlistLinks)
+                        {
+                            externalUrl = link;
+                            playlistLinkIsValid = true;
+                            break;
+                        }
+                    }
+                }
 
-            } catch (HttpRequestException)
-            {
-                return string.Empty;
-            }     
+                return externalUrl;                
+            }            
         }
     }
 }

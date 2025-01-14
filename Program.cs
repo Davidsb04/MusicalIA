@@ -19,6 +19,7 @@ namespace Musicalia
 
             builder.Services.AddScoped<IOllamaService, OllamaService>();
             builder.Services.AddScoped<ISpotifyService, SpotifyService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
 
             var app = builder.Build();
 
