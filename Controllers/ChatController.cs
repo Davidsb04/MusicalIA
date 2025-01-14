@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Musicalia.Services.Interfaces;
+using Swan.Parsers;
 
 namespace Musicalia.Controllers
 {
@@ -7,12 +9,21 @@ namespace Musicalia.Controllers
     [ApiController]
     public class ChatController : ControllerBase
     {
+        private readonly ISpotifyService _spotifyService;
+
+        public ChatController(ISpotifyService spotifyService)
+        {
+            _spotifyService = spotifyService;
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreatePlaylist(string text)
+        public async Task<IActionResult> CreatePlaylist()
         {
             try
             {
+                string token = await _spotifyService.GetAccessToken();
 
+                return Ok(token);
             }
             catch (Exception ex)
             {

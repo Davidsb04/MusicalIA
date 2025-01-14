@@ -2,6 +2,6 @@
 {
     public interface ISpotifyService
     {
-        Task<String> GetSpotifyToken();
+        Task<String> GetAccessToken();
     }
 }
