@@ -8,20 +8,27 @@ namespace Musicalia.Controllers
     public class ChatController : ControllerBase
     {
         private readonly ISpotifyService _spotifyService;
+        private readonly IOllamaService _olamaService;
 
-        public ChatController(ISpotifyService spotifyService)
+        public ChatController(ISpotifyService spotifyService, IOllamaService olamaService)
         {
             _spotifyService = spotifyService;
+            _olamaService = olamaService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GetSpotifyPlaylist(string query)
+        [HttpPost("Chat")]
+        public async Task<IActionResult> ChatOllama(string prompt)
         {
             try
             {
-                string playlistLink = await _spotifyService.GetPlaylistLink(query);
+                string playlistLink = string.Empty;
 
-                if (playlistLink != string.Empty )
+                string response = await _olamaService.GetMusicalGenreByOllama(prompt);                
+
+                if (response != string.Empty)
+                    playlistLink = await _spotifyService.GetPlaylistLink(response);
+
+                if (playlistLink != string.Empty)
                     return Ok(playlistLink);
 
                 return NotFound("Não foi possível retornar o link da playlist.");
