@@ -16,7 +16,7 @@ namespace Musicalia.Controllers
             _olamaService = olamaService;
         }
 
-        [HttpPost("Chat")]
+        [HttpPost("ChatOllama")]
         public async Task<IActionResult> ChatOllama(string prompt)
         {
             try
