@@ -11,7 +11,7 @@ namespace Musicalia.Services.Classes
 
         public OllamaService()
         {
-            _ollamaApiClient = new OllamaApiClient("http://host.docker.internal:11434", "llama3.2-vision:latest");
+            _ollamaApiClient = new OllamaApiClient("http://host.docker.internal:11434", "llama3.2:latest");
         }
 
         public async Task<string> GetMusicalGenreByOllama(string userRequest)
