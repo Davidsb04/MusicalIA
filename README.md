@@ -18,25 +18,14 @@ Musicalia é um projeto de inteligência artificial que sugere playlists do Spot
 
 ### Passo 1: Configurar o Backend
 
-1. Navegue até a pasta raiz do backend.
-2. Execute o comando:
-   ```bash
-   docker build -t musicalia_backend .
-
-3. Inicie o container do backend:
-   ```bash
-    docker run -p 8080:8080 musicalia_backend .
+- Você pode acessar o Docker Hub e executar as imagens [Backend](https://hub.docker.com/r/davidsb04/musicalia-backend).
    
 ### Passo 2: Configurar o Frontend
-1. Navegue até a pasta raiz do frontend.
-2. Execute o comando:
-   ```bash
-    docker build -t musicalia_frontend .
-3. Inicie o container do frontend:
-   ```bash
-    docker run -p 3000:3000 musicalia_frontend
+
+1. Você pode acessar o Docker Hub e executar as imagens [Frontend](https://hub.docker.com/r/davidsb04/musicalia-frontend).
 
 ### Passo 3: Configurar o Ollama
+
 1. Instale o Ollama seguindo as instruções em [Ollama](https://ollama.com/).
 2. Baixe o modelo Llama 3.2:
    ```bash  
